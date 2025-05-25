@@ -69,13 +69,6 @@ with st.sidebar:
     if 'editing_style' not in st.session_state:
         st.session_state.editing_style = None
     
-    # 文体の選択
-    style = st.selectbox(
-        "変換後の文体を選択してください",
-        ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-        key="style_selector"
-    )
-    
     # 文体編集の折りたたみ
     st.markdown("---")
     if st.button("✏️ 文体を編集する", use_container_width=True):
@@ -200,6 +193,13 @@ with st.sidebar:
                     save_styles(st.session_state.styles)  # 変更を保存
                     st.success(f"「{style_to_edit}」を削除しました。")
                     st.rerun()
+
+# 文体の選択
+style = st.selectbox(
+    "変換後の文体を選択してください",
+    ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
+    key="style_selector"
+)
 
 # 入力エリア
 input_text = st.text_area("変換したい文章を入力してください", height=200)
