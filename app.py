@@ -136,11 +136,15 @@ with st.sidebar:
                             if st.button("削除", key=f"delete_example_{i}", type="primary"):
                                 selected_style["examples"].pop(i-1)
                                 save_styles(st.session_state.styles)  # 変更を保存
-                                st.success("例文を削除しました。")
                                 st.rerun()
                 
                 # 新しい例文の追加
                 st.markdown("###### 新しい例文の追加")
+                if 'new_example_input' not in st.session_state:
+                    st.session_state.new_example_input = ""
+                if 'new_example_output' not in st.session_state:
+                    st.session_state.new_example_output = ""
+                
                 new_example_input = st.text_area("変換前の例文", key="new_example_input")
                 new_example_output = st.text_area("変換後の例文", key="new_example_output")
                 
@@ -154,6 +158,9 @@ with st.sidebar:
                         })
                         save_styles(st.session_state.styles)  # 変更を保存
                         st.success("例文を追加しました。")
+                        # 入力欄をクリア
+                        del st.session_state.new_example_input
+                        del st.session_state.new_example_output
                         st.rerun()
             
             with tab2:
