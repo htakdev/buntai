@@ -5,6 +5,8 @@ from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 import os
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, db
 
 # 環境変数の読み込み
 load_dotenv()
@@ -16,6 +18,39 @@ st.set_page_config(
     layout="wide"
 )
 
+# Firebase初期化
+if not firebase_admin._apps:
+    try:
+        # Streamlit Community Cloud環境の場合
+        cred = credentials.Certificate(dict(st.secrets["firebase"]))
+    except:
+        # ローカル環境の場合
+        cred = credentials.Certificate('firebase-credentials.json')
+    
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
+    })
+
+def load_styles():
+    """文体データをFirebaseから読み込む"""
+    try:
+        ref = db.reference('/styles')
+        data = ref.get()
+        if data:
+            return data
+        return []  # データが存在しない場合は空のリストを返す
+    except Exception as e:
+        st.error(f"データの読み込みに失敗しました: {str(e)}")
+        return []
+
+def save_styles(styles):
+    """文体データをFirebaseに保存"""
+    try:
+        ref = db.reference('/styles')
+        ref.set(styles)
+    except Exception as e:
+        st.error(f"データの保存に失敗しました: {str(e)}")
+
 # タイトル
 st.title("📝 文体さん")
 st.markdown("入力された文章を指定した文体に変換します。")
@@ -26,53 +61,7 @@ with st.sidebar:
     
     # セッション状態の初期化
     if 'styles' not in st.session_state:
-        st.session_state.styles = [
-            {
-                "name": "起業家",
-                "examples": [
-                    {
-                        "input": "吾輩は猫である。名前はまだ無い。",
-                        "output": "私は、革新的なビジョンと強いリーダーシップを持つ起業家です。まだ具体的な名前はありませんが、それは私の柔軟性と可能性の証です。"
-                    }
-                ]
-            },
-            {
-                "name": "Webエンジニア",
-                "examples": [
-                    {
-                        "input": "吾輩は猫である。名前はまだ無い。",
-                        "output": "私は、HTMLとCSSで構築された猫です。まだ名前は未定義ですが、それは後で変数として定義できます。"
-                    }
-                ]
-            },
-            {
-                "name": "JTC部長",
-                "examples": [
-                    {
-                        "input": "吾輩は猫である。名前はまだ無い。",
-                        "output": "我々は、効率的な猫の運用を目指しています。現時点では名前は未定ですが、これは適切なタイミングで決定される予定です。"
-                    }
-                ]
-            },
-            {
-                "name": "AWS公式サイト",
-                "examples": [
-                    {
-                        "input": "吾輩は猫である。名前はまだ無い。",
-                        "output": "吾輩は優れた柔軟性、スケーラビリティ、および信頼性を備えた高度な猫である。名前はまだ無いが、これは将来の拡張性を考慮した設計である。"
-                    }
-                ]
-            },
-            {
-                "name": "限界オタク",
-                "examples": [
-                    {
-                        "input": "吾輩は猫である。名前はまだ無い。",
-                        "output": "私、猫という生き物に命を捧げる者です！まだ名前はありませんが、それは私のキャラクター性をより際立たせるための伏線です！"
-                    }
-                ]
-            }
-        ]
+        st.session_state.styles = load_styles()
     if 'show_edit_style' not in st.session_state:
         st.session_state.show_edit_style = False
     if 'selected_style' not in st.session_state:
@@ -110,9 +99,15 @@ with st.sidebar:
             else:
                 st.session_state.styles.append({
                     "name": new_style,
-                    "examples": []
+                    "examples": [
+                        {
+                            "input": "",
+                            "output": ""
+                        }
+                    ]
                 })
                 st.session_state.selected_style = new_style
+                save_styles(st.session_state.styles)  # 変更を保存
                 st.success(f"「{new_style}」を追加しました！")
                 st.rerun()
         
@@ -140,6 +135,7 @@ with st.sidebar:
                             st.markdown(f"**出力：**\n{example['output']}")
                             if st.button("削除", key=f"delete_example_{i}", type="primary"):
                                 selected_style["examples"].pop(i-1)
+                                save_styles(st.session_state.styles)  # 変更を保存
                                 st.success("例文を削除しました。")
                                 st.rerun()
                 
@@ -156,6 +152,7 @@ with st.sidebar:
                             "input": new_example_input,
                             "output": new_example_output
                         })
+                        save_styles(st.session_state.styles)  # 変更を保存
                         st.success("例文を追加しました。")
                         st.rerun()
             
@@ -181,6 +178,7 @@ with st.sidebar:
                                 style["name"] = new_style_name
                                 break
                         st.session_state.editing_style = new_style_name  # 編集後の文体を保持
+                        save_styles(st.session_state.styles)  # 変更を保存
                         st.success(f"「{style_to_edit}」を「{new_style_name}」に変更しました。")
                         st.rerun()
             
@@ -192,6 +190,7 @@ with st.sidebar:
                     if st.session_state.selected_style == style_to_edit:
                         st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
                     st.session_state.editing_style = None  # 削除時は編集状態をクリア
+                    save_styles(st.session_state.styles)  # 変更を保存
                     st.success(f"「{style_to_edit}」を削除しました。")
                     st.rerun()
 
