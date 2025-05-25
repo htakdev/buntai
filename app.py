@@ -55,151 +55,152 @@ def save_styles(styles):
 st.title("📝 文体さん")
 st.markdown("入力された文章を指定した文体に変換します。")
 
-# サイドバーで文体の選択
-with st.sidebar:
-    st.header("設定")
-    
-    # セッション状態の初期化
-    if 'styles' not in st.session_state:
-        st.session_state.styles = load_styles()
-    if 'show_edit_style' not in st.session_state:
-        st.session_state.show_edit_style = False
-    if 'selected_style' not in st.session_state:
-        st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
-    if 'editing_style' not in st.session_state:
-        st.session_state.editing_style = None
-    
-    # 文体編集の折りたたみ
-    st.markdown("---")
+# セッション状態の初期化
+if 'styles' not in st.session_state:
+    st.session_state.styles = load_styles()
+if 'show_edit_style' not in st.session_state:
+    st.session_state.show_edit_style = False
+if 'selected_style' not in st.session_state:
+    st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
+if 'editing_style' not in st.session_state:
+    st.session_state.editing_style = None
+
+# 文体選択と編集ボタンを横並びに
+col1, col2 = st.columns([3, 1])
+with col1:
+    style = st.selectbox(
+        "変換後の文体を選択してください",
+        ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
+        key="style_selector"
+    )
+with col2:
     if st.button("✏️ 文体を編集する", use_container_width=True):
         st.session_state.show_edit_style = not st.session_state.show_edit_style
-    
-    if st.session_state.show_edit_style:
-        st.markdown("### 文体の編集")
-        
-        # 新しい文体の追加
-        st.markdown("#### 新しい文体を追加")
-        new_style = st.text_input("追加する文体名を入力")
-        
-        # 警告メッセージ用のコンテナ
-        add_warning_container = st.empty()
-        
-        if st.button("追加", use_container_width=True):
-            if not new_style:
-                add_warning_container.warning("文体名を入力してください。")
-            elif any(style["name"] == new_style for style in st.session_state.styles):
-                add_warning_container.warning("この文体は既に存在します。")
-            else:
-                st.session_state.styles.append({
-                    "name": new_style,
-                    "examples": [
-                        {
-                            "input": "",
-                            "output": ""
-                        }
-                    ]
-                })
-                st.session_state.selected_style = new_style
-                save_styles(st.session_state.styles)  # 変更を保存
-                st.success(f"「{new_style}」を追加しました！")
-                st.rerun()
-        
-        # 文体の削除
-        st.markdown("#### 文体の編集・削除")
-        style_to_edit = st.selectbox(
-            "編集または削除する文体を選択",
-            ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-            index=[style["name"] for style in st.session_state.styles].index(st.session_state.editing_style) + 1 if st.session_state.editing_style in [style["name"] for style in st.session_state.styles] else 0
-        )
-        
-        if style_to_edit != "文体を選択してください":
-            # タブの作成
-            tab1, tab2, tab3 = st.tabs(["例文の編集", "文体の名称の変更", "文体の削除"])
-            
-            with tab1:
-                st.markdown("##### 例文の編集")
-                # 現在の例文の表示
-                selected_style = next((s for s in st.session_state.styles if s["name"] == style_to_edit), None)
-                if selected_style and selected_style["examples"]:
-                    st.markdown("###### 現在の例文")
-                    for i, example in enumerate(selected_style["examples"], 1):
-                        with st.expander(f"例文 {i}"):
-                            st.markdown(f"**入力：**\n{example['input']}")
-                            st.markdown(f"**出力：**\n{example['output']}")
-                            if st.button("削除", key=f"delete_example_{i}", type="primary"):
-                                selected_style["examples"].pop(i-1)
-                                save_styles(st.session_state.styles)  # 変更を保存
-                                st.rerun()
-                
-                # 新しい例文の追加
-                st.markdown("###### 新しい例文の追加")
-                if 'new_example_input' not in st.session_state:
-                    st.session_state.new_example_input = ""
-                if 'new_example_output' not in st.session_state:
-                    st.session_state.new_example_output = ""
-                
-                new_example_input = st.text_area("変換前の例文", key="new_example_input")
-                new_example_output = st.text_area("変換後の例文", key="new_example_output")
-                
-                if st.button("例文を追加", use_container_width=True):
-                    if not new_example_input or not new_example_output:
-                        st.warning("変換前と変換後の例文を両方入力してください。")
-                    else:
-                        selected_style["examples"].append({
-                            "input": new_example_input,
-                            "output": new_example_output
-                        })
-                        save_styles(st.session_state.styles)  # 変更を保存
-                        st.success("例文を追加しました。")
-                        # 入力欄をクリア
-                        del st.session_state.new_example_input
-                        del st.session_state.new_example_output
-                        st.rerun()
-            
-            with tab2:
-                st.markdown("##### 文体の名称の変更")
-                new_style_name = st.text_input("変更後の名称")
-                
-                # 警告メッセージ用のコンテナ
-                edit_warning_container = st.empty()
-                
-                if st.button("名称を変更", use_container_width=True):
-                    if not new_style_name:
-                        edit_warning_container.warning("新しい名称を入力してください。")
-                    elif any(style["name"] == new_style_name for style in st.session_state.styles):
-                        edit_warning_container.warning("この名称は既に存在します。")
-                    else:
-                        # 選択中の文体を更新
-                        if st.session_state.selected_style == style_to_edit:
-                            st.session_state.selected_style = new_style_name
-                        # 文体リストを更新
-                        for style in st.session_state.styles:
-                            if style["name"] == style_to_edit:
-                                style["name"] = new_style_name
-                                break
-                        st.session_state.editing_style = new_style_name  # 編集後の文体を保持
-                        save_styles(st.session_state.styles)  # 変更を保存
-                        st.success(f"「{style_to_edit}」を「{new_style_name}」に変更しました。")
-                        st.rerun()
-            
-            with tab3:
-                st.markdown("##### 文体の削除")
-                st.warning(f"「{style_to_edit}」を削除しますか？この操作は取り消せません。")
-                if st.button("削除", use_container_width=True, type="primary"):
-                    st.session_state.styles = [style for style in st.session_state.styles if style["name"] != style_to_edit]
-                    if st.session_state.selected_style == style_to_edit:
-                        st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
-                    st.session_state.editing_style = None  # 削除時は編集状態をクリア
-                    save_styles(st.session_state.styles)  # 変更を保存
-                    st.success(f"「{style_to_edit}」を削除しました。")
-                    st.rerun()
 
-# 文体の選択
-style = st.selectbox(
-    "変換後の文体を選択してください",
-    ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-    key="style_selector"
-)
+@st.dialog("文体の編集")
+def edit_style_dialog():
+    st.markdown("### 文体の編集")
+    
+    # 新しい文体の追加
+    st.markdown("#### 新しい文体を追加")
+    new_style = st.text_input("追加する文体名を入力")
+    
+    # 警告メッセージ用のコンテナ
+    add_warning_container = st.empty()
+    
+    if st.button("追加", use_container_width=True):
+        if not new_style:
+            add_warning_container.warning("文体名を入力してください。")
+        elif any(style["name"] == new_style for style in st.session_state.styles):
+            add_warning_container.warning("この文体は既に存在します。")
+        else:
+            st.session_state.styles.append({
+                "name": new_style,
+                "examples": [
+                    {
+                        "input": "",
+                        "output": ""
+                    }
+                ]
+            })
+            st.session_state.selected_style = new_style
+            save_styles(st.session_state.styles)  # 変更を保存
+            st.success(f"「{new_style}」を追加しました！")
+            st.rerun()
+    
+    # 文体の削除
+    st.markdown("#### 文体の編集・削除")
+    style_to_edit = st.selectbox(
+        "編集または削除する文体を選択",
+        ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
+        index=[style["name"] for style in st.session_state.styles].index(st.session_state.editing_style) + 1 if st.session_state.editing_style in [style["name"] for style in st.session_state.styles] else 0
+    )
+    
+    if style_to_edit != "文体を選択してください":
+        # タブの作成
+        tab1, tab2, tab3 = st.tabs(["例文の編集", "文体の名称の変更", "文体の削除"])
+        
+        with tab1:
+            st.markdown("##### 例文の編集")
+            # 現在の例文の表示
+            selected_style = next((s for s in st.session_state.styles if s["name"] == style_to_edit), None)
+            if selected_style and selected_style["examples"]:
+                st.markdown("###### 現在の例文")
+                for i, example in enumerate(selected_style["examples"], 1):
+                    with st.expander(f"例文 {i}"):
+                        st.markdown(f"**入力：**\n{example['input']}")
+                        st.markdown(f"**出力：**\n{example['output']}")
+                        if st.button("削除", key=f"delete_example_{i}", type="primary"):
+                            selected_style["examples"].pop(i-1)
+                            save_styles(st.session_state.styles)  # 変更を保存
+                            st.rerun()
+            
+            # 新しい例文の追加
+            st.markdown("###### 新しい例文の追加")
+            if 'new_example_input' not in st.session_state:
+                st.session_state.new_example_input = ""
+            if 'new_example_output' not in st.session_state:
+                st.session_state.new_example_output = ""
+            
+            new_example_input = st.text_area("変換前の例文", key="new_example_input")
+            new_example_output = st.text_area("変換後の例文", key="new_example_output")
+            
+            if st.button("例文を追加", use_container_width=True):
+                if not new_example_input or not new_example_output:
+                    st.warning("変換前と変換後の例文を両方入力してください。")
+                else:
+                    selected_style["examples"].append({
+                        "input": new_example_input,
+                        "output": new_example_output
+                    })
+                    save_styles(st.session_state.styles)  # 変更を保存
+                    st.success("例文を追加しました。")
+                    # 入力欄をクリア
+                    del st.session_state.new_example_input
+                    del st.session_state.new_example_output
+                    st.rerun()
+        
+        with tab2:
+            st.markdown("##### 文体の名称の変更")
+            new_style_name = st.text_input("変更後の名称")
+            
+            # 警告メッセージ用のコンテナ
+            edit_warning_container = st.empty()
+            
+            if st.button("名称を変更", use_container_width=True):
+                if not new_style_name:
+                    edit_warning_container.warning("新しい名称を入力してください。")
+                elif any(style["name"] == new_style_name for style in st.session_state.styles):
+                    edit_warning_container.warning("この名称は既に存在します。")
+                else:
+                    # 選択中の文体を更新
+                    if st.session_state.selected_style == style_to_edit:
+                        st.session_state.selected_style = new_style_name
+                    # 文体リストを更新
+                    for style in st.session_state.styles:
+                        if style["name"] == style_to_edit:
+                            style["name"] = new_style_name
+                            break
+                    st.session_state.editing_style = new_style_name  # 編集後の文体を保持
+                    save_styles(st.session_state.styles)  # 変更を保存
+                    st.success(f"「{style_to_edit}」を「{new_style_name}」に変更しました。")
+                    st.rerun()
+        
+        with tab3:
+            st.markdown("##### 文体の削除")
+            st.warning(f"「{style_to_edit}」を削除しますか？この操作は取り消せません。")
+            if st.button("削除", use_container_width=True, type="primary"):
+                st.session_state.styles = [style for style in st.session_state.styles if style["name"] != style_to_edit]
+                if st.session_state.selected_style == style_to_edit:
+                    st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
+                st.session_state.editing_style = None  # 削除時は編集状態をクリア
+                save_styles(st.session_state.styles)  # 変更を保存
+                st.success(f"「{style_to_edit}」を削除しました。")
+                st.rerun()
+
+# 文体編集のモーダルを表示
+if st.session_state.show_edit_style:
+    edit_style_dialog()
 
 # 入力エリア
 input_text = st.text_area("変換したい文章を入力してください", height=200)
