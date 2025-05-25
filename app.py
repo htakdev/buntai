@@ -81,7 +81,7 @@ with col2:
         st.session_state.show_edit_style = not st.session_state.show_edit_style
 
 @st.dialog("文体の編集")
-def edit_style_dialog():
+def edit_style_dialog(style_to_edit):
     st.markdown("### 文体の編集")
     
     # 新しい文体の追加
@@ -113,11 +113,11 @@ def edit_style_dialog():
     
     # 文体の削除
     st.markdown("#### 文体の編集・削除")
-    style_to_edit = st.selectbox(
-        "編集または削除する文体を選択",
-        ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-        index=[style["name"] for style in st.session_state.styles].index(st.session_state.editing_style) + 1 if st.session_state.editing_style in [style["name"] for style in st.session_state.styles] else 0
-    )
+    # style_to_edit = st.selectbox(
+    #     "編集または削除する文体を選択",
+    #     ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
+    #     index=[style["name"] for style in st.session_state.styles].index(st.session_state.editing_style) + 1 if st.session_state.editing_style in [style["name"] for style in st.session_state.styles] else 0
+    # )
     
     if style_to_edit != "文体を選択してください":
         # タブの作成
@@ -164,7 +164,7 @@ def edit_style_dialog():
                     st.rerun()
         
         with tab2:
-            st.markdown("##### 文体の名称の変更")
+            st.markdown(f"##### 変更前の名称：{style_to_edit}")
             new_style_name = st.text_input("変更後の名称")
             
             # 警告メッセージ用のコンテナ
@@ -190,7 +190,7 @@ def edit_style_dialog():
                     st.rerun()
         
         with tab3:
-            st.markdown("##### 文体の削除")
+            st.markdown(f"##### 削除する文体：{style_to_edit}")
             st.warning(f"「{style_to_edit}」を削除しますか？この操作は取り消せません。")
             if st.button("削除", use_container_width=True, type="primary"):
                 st.session_state.styles = [style for style in st.session_state.styles if style["name"] != style_to_edit]
@@ -203,7 +203,7 @@ def edit_style_dialog():
 
 # 文体編集のモーダルを表示
 if st.session_state.show_edit_style:
-    edit_style_dialog()
+    edit_style_dialog(style)
 
 # 入力エリア
 input_text = st.text_area("変換したい文章を入力してください", height=200)
