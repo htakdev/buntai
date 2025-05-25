@@ -31,59 +31,8 @@ if not firebase_admin._apps:
         'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
     })
 
-def load_styles():
-    """文体データをFirebaseから読み込む"""
-    try:
-        ref = db.reference('/styles')
-        data = ref.get()
-        if data:
-            return data
-        return []  # データが存在しない場合は空のリストを返す
-    except Exception as e:
-        st.error(f"データの読み込みに失敗しました: {str(e)}")
-        return []
-
-def save_styles(styles):
-    """文体データをFirebaseに保存"""
-    try:
-        ref = db.reference('/styles')
-        ref.set(styles)
-    except Exception as e:
-        st.error(f"データの保存に失敗しました: {str(e)}")
-
-# タイトル
-st.title("📝 文体さん")
-st.markdown("入力された文章を指定した文体に変換します。")
-
-# セッション状態の初期化
-if 'styles' not in st.session_state:
-    st.session_state.styles = load_styles()
-if 'show_edit_style' not in st.session_state:
-    st.session_state.show_edit_style = False
-if 'selected_style' not in st.session_state:
-    st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
-if 'editing_style' not in st.session_state:
-    st.session_state.editing_style = None
-
-# col1とcol2の高さを合わせたいが、col1のラベルのせいで不揃いになるためアドホックに解決した
-st.markdown(":small[変換後の文体を選択してください]") # 本来はcol1のラベルだが外に切り出し
-
-col1, col2 = st.columns([3, 1])
-with col1:
-    style = st.selectbox(
-        "変換後の文体を選択してください", # label_visibility="collapsed"により非表示
-        ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-        key="style_selector",
-        label_visibility="collapsed"
-    )
-with col2:
-    if st.button("✏️ 文体を編集する", use_container_width=True):
-        st.session_state.show_edit_style = not st.session_state.show_edit_style
-
 @st.dialog("文体の編集")
 def edit_style_dialog(style_to_edit):
-    st.markdown("### 文体の編集")
-    
     # 新しい文体の追加
     st.markdown("#### 新しい文体を追加")
     new_style = st.text_input("追加する文体名を入力")
@@ -113,18 +62,15 @@ def edit_style_dialog(style_to_edit):
     
     # 文体の削除
     st.markdown("#### 文体の編集・削除")
-    # style_to_edit = st.selectbox(
-    #     "編集または削除する文体を選択",
-    #     ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-    #     index=[style["name"] for style in st.session_state.styles].index(st.session_state.editing_style) + 1 if st.session_state.editing_style in [style["name"] for style in st.session_state.styles] else 0
-    # )
     
-    if style_to_edit != "文体を選択してください":
+    if style_to_edit == "文体を選択してください":
+        st.warning("先に文体を選択してください。")
+    else:
         # タブの作成
-        tab1, tab2, tab3 = st.tabs(["例文の編集", "文体の名称の変更", "文体の削除"])
+        tab1, tab2, tab3 = st.tabs(["例文の編集", "名称の変更", "文体の削除"])
         
         with tab1:
-            st.markdown("##### 例文の編集")
+            st.markdown(f"##### 例文の編集：{style_to_edit}")
             # 現在の例文の表示
             selected_style = next((s for s in st.session_state.styles if s["name"] == style_to_edit), None)
             if selected_style and selected_style["examples"]:
@@ -135,6 +81,12 @@ def edit_style_dialog(style_to_edit):
                         st.markdown(f"**出力：**\n{example['output']}")
                         if st.button("削除", key=f"delete_example_{i}", type="primary"):
                             selected_style["examples"].pop(i-1)
+                            if len(selected_style["examples"]) == 0:
+                                selected_style["examples"].append({
+                                    "input": "",
+                                    "output": ""
+                                })
+
                             save_styles(st.session_state.styles)  # 変更を保存
                             st.rerun()
             
@@ -201,9 +153,52 @@ def edit_style_dialog(style_to_edit):
                 st.success(f"「{style_to_edit}」を削除しました。")
                 st.rerun()
 
-# 文体編集のモーダルを表示
-if st.session_state.show_edit_style:
-    edit_style_dialog(style)
+
+def load_styles():
+    """文体データをFirebaseから読み込む"""
+    try:
+        ref = db.reference('/styles')
+        data = ref.get()
+        if data:
+            return data
+        return []  # データが存在しない場合は空のリストを返す
+    except Exception as e:
+        st.error(f"データの読み込みに失敗しました: {str(e)}")
+        return []
+
+
+def save_styles(styles):
+    """文体データをFirebaseに保存"""
+    try:
+        ref = db.reference('/styles')
+        ref.set(styles)
+    except Exception as e:
+        st.error(f"データの保存に失敗しました: {str(e)}")
+
+
+# タイトル
+st.title("📝 文体さん")
+st.markdown("入力された文章を指定した文体に変換します。")
+
+# セッション状態の初期化
+if 'styles' not in st.session_state:
+    st.session_state.styles = load_styles()
+if 'selected_style' not in st.session_state:
+    st.session_state.selected_style = st.session_state.styles[0]["name"] if st.session_state.styles else None
+if 'editing_style' not in st.session_state:
+    st.session_state.editing_style = None
+
+col1, col2 = st.columns([3, 1])
+with col1:
+    style = st.selectbox(
+        "変換後の文体を選択してください", # label_visibility="collapsed"により非表示
+        ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
+        key="style_selector",
+        label_visibility="collapsed"
+    )
+with col2:
+    if st.button("✏️ 文体を編集する", use_container_width=True):
+        edit_style_dialog(style)
 
 # 入力エリア
 input_text = st.text_area("変換したい文章を入力してください", height=200)
