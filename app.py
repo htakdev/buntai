@@ -11,13 +11,13 @@ load_dotenv()
 
 # ページ設定
 st.set_page_config(
-    page_title="文体変換アプリ",
-    page_icon="✨",
+    page_title="文体さん",
+    page_icon="📝",
     layout="wide"
 )
 
 # タイトル
-st.title("✨ 文体変換アプリ")
+st.title("📝 文体さん")
 st.markdown("入力された文章を指定した文体に変換します。")
 
 # サイドバーで文体の選択
@@ -25,7 +25,7 @@ with st.sidebar:
     st.header("設定")
     style = st.selectbox(
         "変換後の文体を選択してください",
-        ["丁寧語", "カジュアル", "ビジネス", "詩的な表現", "古風な表現"]
+        ["起業家", "Webエンジニア", "JTC部長", "AWS公式サイト", "限界オタク"]
     )
 
 # 入力エリア
@@ -38,13 +38,13 @@ if st.button("変換開始"):
     else:
         # プロンプトの作成
         prompt = ChatPromptTemplate.from_messages([
-            ("system", f"あなたは文章の文体を{style}に変換する専門家です。入力された文章を指定された文体に変換してください。"),
+            ("system", f"あなたは文章の文体を{style}に変換する専門家です。入力された文章を指定された文体に変換してください。変換結果だけを出力してください。"),
             ("user", "{input}")
         ])
 
         # モデルの設定
         model = ChatOpenAI(
-            model="gpt-4",
+            model="gpt-4.1",
             temperature=0.7,
             streaming=True
         )
