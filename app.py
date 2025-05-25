@@ -35,14 +35,14 @@ if not firebase_admin._apps:
 def edit_style_dialog(style_to_edit):
     # 新しい文体の追加
     st.markdown("#### 新しい文体を追加")
-    new_style = st.text_input("追加する文体名を入力")
+    new_style = st.text_input("追加する文体の名称（名称も結果に影響します）")
     
     # 警告メッセージ用のコンテナ
     add_warning_container = st.empty()
     
     if st.button("追加", use_container_width=True):
         if not new_style:
-            add_warning_container.warning("文体名を入力してください。")
+            add_warning_container.warning("文体の名称を入力してください。")
         elif any(style["name"] == new_style for style in st.session_state.styles):
             add_warning_container.warning("この文体は既に存在します。")
         else:
@@ -143,7 +143,7 @@ def edit_style_dialog(style_to_edit):
         
         with tab3:
             st.markdown(f"##### 削除する文体：{style_to_edit}")
-            st.warning(f"「{style_to_edit}」を削除しますか？この操作は取り消せません。")
+            st.warning(f"「{style_to_edit}」を削除しますか？ この操作は取り消せません。")
             if st.button("削除", use_container_width=True, type="primary"):
                 st.session_state.styles = [style for style in st.session_state.styles if style["name"] != style_to_edit]
                 if st.session_state.selected_style == style_to_edit:
