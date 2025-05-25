@@ -65,13 +65,16 @@ if 'selected_style' not in st.session_state:
 if 'editing_style' not in st.session_state:
     st.session_state.editing_style = None
 
-# 文体選択と編集ボタンを横並びに
+# col1とcol2の高さを合わせたいが、col1のラベルのせいで不揃いになるためアドホックに解決した
+st.markdown(":small[変換後の文体を選択してください]") # 本来はcol1のラベルだが外に切り出し
+
 col1, col2 = st.columns([3, 1])
 with col1:
     style = st.selectbox(
-        "変換後の文体を選択してください",
+        "変換後の文体を選択してください", # label_visibility="collapsed"により非表示
         ["文体を選択してください"] + [style["name"] for style in st.session_state.styles],
-        key="style_selector"
+        key="style_selector",
+        label_visibility="collapsed"
     )
 with col2:
     if st.button("✏️ 文体を編集する", use_container_width=True):
