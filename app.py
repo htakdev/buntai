@@ -65,6 +65,7 @@ def edit_style_dialog(style_to_edit):
     
     if style_to_edit == "文体を選択してください":
         st.warning("先に文体を選択してください。")
+        return
     else:
         # タブの作成
         tab1, tab2, tab3 = st.tabs(["例文の編集", "名称の変更", "文体の削除"])
