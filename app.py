@@ -57,7 +57,7 @@ def edit_style_dialog(style_to_edit):
             })
             st.session_state.selected_style = new_style
             save_styles(st.session_state.styles)  # 変更を保存
-            st.success(f"「{new_style}」を追加しました！")
+            st.success(f"「{new_style}」を追加しました。")
             st.rerun()
     
     # 文体の削除
