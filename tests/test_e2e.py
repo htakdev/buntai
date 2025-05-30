@@ -104,6 +104,46 @@ def test_add_example_to_existing_style(page: Page, streamlit_process):
     # 例文が追加されているかの確認
     expect(page.locator("text=例文 1")).to_be_visible()
 
+def test_show_error_when_adding_empty_example(page: Page, streamlit_process):
+    """空の例文での追加試行のテスト"""
+    # Streamlitアプリにアクセス
+    page.goto("http://localhost:8501")
+    page.wait_for_load_state("networkidle")
+
+    # 既存の文体を選択
+    page.wait_for_selector("div.stSelectbox")
+    page.click("div.stSelectbox")
+    page.click("text=テスト文体")
+
+    # 文体編集ボタンをクリック
+    page.wait_for_selector("button:has-text('✏️ 文体を編集する')")
+    page.click("button:has-text('✏️ 文体を編集する')")
+
+    # 例文の編集タブを選択
+    page.wait_for_selector("text=例文の編集")
+    page.click("text=例文の編集")
+
+    # 両方の例文が未入力の状態で追加を試みる
+    page.click("button:has-text('例文を追加')")
+
+    # 警告メッセージの確認
+    expect(page.locator("text=変換前と変換後の例文を両方入力してください。")).to_be_visible()
+
+    # 変換前の例文のみ入力
+    page.fill("textarea[aria-label='変換前の例文']", "こんにちは")
+    page.click("button:has-text('例文を追加')")
+
+    # 警告メッセージの確認
+    expect(page.locator("text=変換前と変換後の例文を両方入力してください。")).to_be_visible()
+
+    # 変換後の例文のみ入力
+    page.fill("textarea[aria-label='変換前の例文']", "")
+    page.fill("textarea[aria-label='変換後の例文']", "こんにちはでございます")
+    page.click("button:has-text('例文を追加')")
+
+    # 警告メッセージの確認
+    expect(page.locator("text=変換前と変換後の例文を両方入力してください。")).to_be_visible()
+
 def test_convert_text_using_selected_style(page: Page, streamlit_process):
     """テキスト変換機能のテスト"""
     # Streamlitアプリにアクセス
@@ -123,6 +163,50 @@ def test_convert_text_using_selected_style(page: Page, streamlit_process):
 
     # 変換結果の確認
     expect(page.locator("text=こんにちはでございます")).to_be_visible()
+
+def test_show_error_when_converting_without_text(page: Page, streamlit_process):
+    """文体と文章が入力されていない状態での変換試行のテスト"""
+    # Streamlitアプリにアクセス
+    page.goto("http://localhost:8501")
+    page.wait_for_load_state("networkidle")
+
+    # 変換ボタンをクリック
+    page.click("button:has-text('変換開始')")
+
+    # 警告メッセージの確認
+    expect(page.locator("text=文体を選択してください。")).to_be_visible()
+
+def test_show_error_when_converting_without_text_after_selecting_style(page: Page, streamlit_process):
+    """文体は選択されているが文章が入力されていない状態での変換試行のテスト"""
+    # Streamlitアプリにアクセス
+    page.goto("http://localhost:8501")
+    page.wait_for_load_state("networkidle")
+
+    # 既存の文体を選択
+    page.wait_for_selector("div.stSelectbox")
+    page.click("div.stSelectbox")
+    page.click("text=テスト文体")
+
+    # 変換ボタンをクリック
+    page.click("button:has-text('変換開始')")
+
+    # 警告メッセージの確認
+    expect(page.locator("text=文章を入力してください。")).to_be_visible()
+
+def test_show_error_when_converting_without_selecting_style(page: Page, streamlit_process):
+    """文体が選択されていない状態での変換試行のテスト"""
+    # Streamlitアプリにアクセス
+    page.goto("http://localhost:8501")
+    page.wait_for_load_state("networkidle")
+
+    # テキストを入力
+    page.fill("textarea[aria-label='変換したい文章を入力してください']", "こんにちは")
+
+    # 変換ボタンをクリック
+    page.click("button:has-text('変換開始')")
+
+    # 警告メッセージの確認
+    expect(page.locator("text=文体を選択してください。")).to_be_visible()
 
 def test_delete_all_examples_from_style(page: Page, streamlit_process):
     """既存の文体の例文を削除するテスト"""
