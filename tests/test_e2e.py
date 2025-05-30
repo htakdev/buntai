@@ -38,7 +38,7 @@ def page(browser):
     yield page
     page.close()
 
-def test_add_new_style(page: Page, streamlit_process):
+def test_add_new_style_successfully(page: Page, streamlit_process):
     """新しい文体を追加するテスト"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -58,7 +58,7 @@ def test_add_new_style(page: Page, streamlit_process):
     # 成功メッセージの確認
     expect(page.locator("text=「テスト文体」を追加しました。")).to_be_visible()
 
-def test_style_validation(page: Page, streamlit_process):
+def test_show_error_when_adding_style_without_name(page: Page, streamlit_process):
     """文体名のバリデーションテスト"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -74,7 +74,7 @@ def test_style_validation(page: Page, streamlit_process):
     # 警告メッセージの確認
     expect(page.locator("text=文体の名称を入力してください。")).to_be_visible()
 
-def test_add_example(page: Page, streamlit_process):
+def test_add_example_to_existing_style(page: Page, streamlit_process):
     """既存の文体の例文を追加するテスト"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -104,7 +104,7 @@ def test_add_example(page: Page, streamlit_process):
     # 例文が追加されているかの確認
     expect(page.locator("text=例文 1")).to_be_visible()
 
-def test_convert_text(page: Page, streamlit_process):
+def test_convert_text_using_selected_style(page: Page, streamlit_process):
     """テキスト変換機能のテスト"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -124,7 +124,7 @@ def test_convert_text(page: Page, streamlit_process):
     # 変換結果の確認
     expect(page.locator("text=こんにちはでございます")).to_be_visible()
 
-def test_delete_example(page: Page, streamlit_process):
+def test_delete_all_examples_from_style(page: Page, streamlit_process):
     """既存の文体の例文を削除するテスト"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -168,7 +168,7 @@ def test_delete_example(page: Page, streamlit_process):
     # 成功メッセージの確認
     expect(page.locator("text=例文は未登録です。")).to_be_visible()
 
-def test_edit_existing_style_name(page: Page, streamlit_process):
+def test_rename_style_successfully(page: Page, streamlit_process):
     """既存の文体の名称を編集するテスト（正常系）"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -197,7 +197,7 @@ def test_edit_existing_style_name(page: Page, streamlit_process):
     # 成功メッセージの確認
     expect(page.locator("text=「テスト文体」を「名称変更後のテスト文体」に変更しました。")).to_be_visible()
 
-def test_edit_existing_style_name_existing_to_existing(page: Page, streamlit_process):
+def test_show_error_when_renaming_to_existing_style_name(page: Page, streamlit_process):
     """既存の文体の名称をすでにある名称に編集しようとするテスト（異常系）"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
@@ -226,7 +226,7 @@ def test_edit_existing_style_name_existing_to_existing(page: Page, streamlit_pro
     # 警告メッセージの確認
     expect(page.locator("text=この名称はすでに存在します。")).to_be_visible()
 
-def test_delete_style(page: Page, streamlit_process):
+def test_delete_style_successfully(page: Page, streamlit_process):
     """文体を削除するテスト"""
     # Streamlitアプリにアクセス
     page.goto("http://localhost:8501")
