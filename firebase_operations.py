@@ -7,9 +7,13 @@ from models import Styles, Style, Example
 def initialize_firebase():
     """Firebaseの初期化"""
     if not firebase_admin._apps:
-        try:
+        app_env = os.getenv('APP_ENV', 'local')
+
+        if app_env == 'scc':
+            # Streamlit Community Cloud環境
             cred = credentials.Certificate(dict(st.secrets["firebase"]))
-        except:
+        else:
+            # ローカル環境
             cred = credentials.Certificate('firebase-credentials.json')
 
         firebase_admin.initialize_app(cred, {
