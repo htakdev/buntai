@@ -1,0 +1,25 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "styles": {
+      ".read": true,
+      ".write": true,
+      "$style_index": {
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "examples": {
+          "$example_index": {
+            "input": {
+              ".validate": "newData.isString()"
+            },
+            "output": {
+              ".validate": "newData.isString()"
+            }
+          }
+        }
+      }
+    }
+  }
+}
