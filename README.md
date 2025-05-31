@@ -39,13 +39,16 @@
 
 1.  **Firebase Realtime Database の設定**:
     *   **クレデンシャル**: Firebaseプロジェクトのサービスアカウントキーが必要です。
-        *   ローカル開発の場合: FirebaseからダウンロードしたサービスアカウントキーのJSONファイルをリポジトリのルートディレクトリに `firebase-credentials.json` として配置してください。**このファイルはGitHubなどにアップロードしないよう注意してください。**
+        *   ローカル開発の場合: FirebaseからダウンロードしたサービスアカウントキーのJSONファイルをリポジトリのルートディレクトリに `firebase-credentials.json` とリネームして配置してください。**このファイルはGitHubなどにアップロードしないよう注意してください。**
         *   Streamlit Community Cloudの場合: Streamlit Secrets を使用します。`st.secrets["firebase"]` としてアクセスできるよう、Streamlit Community CloudのSecrets管理画面でサービスアカウントキーの内容を登録してください。形式についてはStreamlitのドキュメントを参照してください。
     *   **Database URL**: Firebase Realtime DatabaseのURLを設定します。
         *   環境変数 `FIREBASE_DATABASE_URL` に、FirebaseプロジェクトのDatabase URL (例: `https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com`) を設定してください。
 
 2.  **OpenAI API キーの設定**:
     *   環境変数 `OPENAI_API_KEY` に、OpenAIのAPIキーを設定してください。LangChainがこの環境変数から自動的にAPIキーを読み込みます。
+
+3.  **実行環境を識別するための環境変数の設定**:
+    *   環境変数 `APP_ENV` に、Streamlit Community Cloudであれば`"scc"`、ローカル環境であれば`"local"`を設定してください。
 
 #### `.env` ファイルの使用 (ローカル開発)
 
@@ -54,9 +57,10 @@
 ```env
 FIREBASE_DATABASE_URL=https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+APP_ENV=local
 ```
 
-`firebase-credentials.json` については、ファイル自体を配置してください。
+`firebase-credentials.json` については、リポジトリのルート階層にファイル自体を配置してください。
 
 #### Streamlit Community Cloud Secrets の使用 (デプロイ)
 
@@ -94,7 +98,7 @@ universe_domain = "googleapis.com"
     ```
 2.  必要なPythonライブラリをインストールします。
     ```bash
-    pip install -r requirements.txt
+    pip install -r requirements.dev.txt
     ```
 3.  上記の「環境変数の設定」を参考に、必要な環境変数またはSecretsを設定します。
 4.  Streamlitアプリケーションを実行します。
