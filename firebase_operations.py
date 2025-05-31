@@ -24,12 +24,12 @@ def load_styles() -> Styles:
     """文体データをFirebaseから読み込む"""
     try:
         ref = db.reference('/styles')
-        data = ref.get()
-        if not data:
+        raw_styles_data = ref.get()
+        if not raw_styles_data:
             return []
 
         styles = []
-        for style in data:
+        for style in raw_styles_data:
             examples = []
             for example in style.get('examples', []):
                 examples.append(Example(
