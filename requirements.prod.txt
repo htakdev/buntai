@@ -1,0 +1,5 @@
+streamlit
+langchain==0.1.12
+langchain-openai==0.0.8
+python-dotenv==1.0.1
+firebase-admin==6.2.0
