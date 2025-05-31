@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, db
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, TypeAlias
 from dataclasses import dataclass
 from functools import partial
 
@@ -21,9 +21,7 @@ class Style:
     name: str
     examples: List[Example]
 
-@dataclass
-class Styles:
-    styles: List[Style]
+Styles: TypeAlias = List[Style]
 
 def create_style(name: str) -> Style:
     """新しい文体を作成する"""
@@ -90,7 +88,7 @@ def load_styles() -> Styles:
         ref = db.reference('/styles')
         data = ref.get()
         if not data:
-            return Styles(styles=[])
+            return []
 
         styles = []
         for style in data:
@@ -104,10 +102,10 @@ def load_styles() -> Styles:
                 name=style.get('name', ''),
                 examples=examples
             ))
-        return Styles(styles=styles)
+        return styles
     except Exception as e:
         st.error(f"データの読み込みに失敗しました: {str(e)}")
-        return Styles(styles=[])
+        return []
 
 def save_styles(styles: Styles):
     """文体データをFirebaseに保存"""
@@ -116,7 +114,7 @@ def save_styles(styles: Styles):
         # 既存のデータを削除
         ref.delete()
         # 新しいデータを保存
-        for i, style in enumerate(styles.styles):
+        for i, style in enumerate(styles):
             style_ref = ref.child(str(i))
             style_ref.set({
                 'name': style.name,
@@ -140,11 +138,11 @@ def render_style_editor(style_to_edit, on_example_modified=False):
     add_warning_container = st.empty()
     
     if st.button("追加", use_container_width=True):
-        is_valid, error_message = validate_style_name(new_style, st.session_state.styles.styles)
+        is_valid, error_message = validate_style_name(new_style, st.session_state.styles)
         if not is_valid:
             add_warning_container.warning(error_message)
         else:
-            st.session_state.styles.styles.append(create_style(new_style))
+            st.session_state.styles.append(create_style(new_style))
             st.session_state.selected_style = new_style
             save_styles(st.session_state.styles)
             st.session_state.success_message = f"「{new_style}」を追加しました。"
@@ -160,7 +158,7 @@ def render_style_editor(style_to_edit, on_example_modified=False):
     
     with tab1:
         st.markdown(f"##### 例文の編集：{style_to_edit}")
-        selected_style = next((style for style in st.session_state.styles.styles if style.name == style_to_edit), None)
+        selected_style = next((style for style in st.session_state.styles if style.name == style_to_edit), None)
         valid_examples = [ex for ex in selected_style.examples if ex.input and ex.output]
 
         if not valid_examples:
@@ -173,9 +171,9 @@ def render_style_editor(style_to_edit, on_example_modified=False):
                     st.markdown(f"**出力：**\n{example.output}")
                     if st.button("削除", key=f"delete_example_{i}", type="primary"):
                         new_style = remove_example(selected_style, i-1)
-                        style_index = next((i for i, style in enumerate(st.session_state.styles.styles) if style.name == style_to_edit), None)
+                        style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
                         if style_index is not None:
-                            st.session_state.styles.styles[style_index] = new_style
+                            st.session_state.styles[style_index] = new_style
                             save_styles(st.session_state.styles)
                             st.session_state.success_message_in_modal = "例文を削除しました。"
                             st.session_state.on_example_modified = True
@@ -201,10 +199,10 @@ def render_style_editor(style_to_edit, on_example_modified=False):
                 st.warning(error_message)
             else:
                 # 選択された文体のインデックスを取得
-                style_index = next((i for i, style in enumerate(st.session_state.styles.styles) if style.name == style_to_edit), None)
+                style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
                 if style_index is not None:
                     new_style = add_example(selected_style, new_example_input, new_example_output)
-                    st.session_state.styles.styles[style_index] = new_style
+                    st.session_state.styles[style_index] = new_style
                     save_styles(st.session_state.styles)
                     del st.session_state.new_example_input
                     del st.session_state.new_example_output
@@ -221,14 +219,14 @@ def render_style_editor(style_to_edit, on_example_modified=False):
         edit_warning_container = st.empty()
         
         if st.button("名称を変更", use_container_width=True):
-            is_valid, error_message = validate_style_name(new_style_name, st.session_state.styles.styles)
+            is_valid, error_message = validate_style_name(new_style_name, st.session_state.styles)
             if not is_valid:
                 edit_warning_container.warning(error_message)
             else:
-                style_index = next((i for i, style in enumerate(st.session_state.styles.styles) if style.name == style_to_edit), None)
+                style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
                 if style_index is not None:
                     new_style = rename_style(selected_style, new_style_name)
-                    st.session_state.styles.styles[style_index] = new_style
+                    st.session_state.styles[style_index] = new_style
                     st.session_state.editing_style = new_style_name
                     save_styles(st.session_state.styles)
                     st.session_state.success_message = f"「{style_to_edit}」を「{new_style_name}」に変更しました。"
@@ -240,9 +238,9 @@ def render_style_editor(style_to_edit, on_example_modified=False):
         st.markdown(f"##### 削除する文体：{style_to_edit}")
         st.warning(f"「{style_to_edit}」を削除しますか？ この操作は取り消せません。")
         if st.button("削除", key=f"delete_style", use_container_width=True, type="primary"):
-            style_index = next((i for i, style in enumerate(st.session_state.styles.styles) if style.name == style_to_edit), None)
+            style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
             if style_index is not None:
-                st.session_state.styles.styles.pop(style_index)
+                st.session_state.styles.pop(style_index)
                 if st.session_state.selected_style == style_to_edit:
                     st.session_state.selected_style = "文体を選択してください"
                 st.session_state.editing_style = None
@@ -264,7 +262,7 @@ def render_text_converter():
         elif not input_text:
             convert_warning_container.warning("文章を入力してください。")
         else:
-            selected_style = next((style for style in st.session_state.styles.styles if style.name == st.session_state.selected_style), None)
+            selected_style = next((style for style in st.session_state.styles if style.name == st.session_state.selected_style), None)
             
             prompt = ChatPromptTemplate.from_messages([
                 ("system", create_prompt(selected_style, input_text) + 
@@ -327,7 +325,7 @@ def main():
     with col1:
         st.session_state.selected_style = st.selectbox(
             "変換後の文体を選択してください",
-            ["文体を選択してください"] + [style.name for style in st.session_state.styles.styles],
+            ["文体を選択してください"] + [style.name for style in st.session_state.styles],
             key="style_selector",
             label_visibility="collapsed"
         )
