@@ -1,21 +1,6 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-from langchain.schema.runnable import RunnablePassthrough
-import os
 from dotenv import load_dotenv
-import firebase_admin
-from firebase_admin import credentials, db
-from typing import List, Optional, Tuple
-from functools import partial
-from models import Styles, Style, Example
-from style_operations import (
-    create_style, add_example, remove_example, rename_style,
-    validate_style_name, validate_example
-)
-from firebase_operations import initialize_firebase, load_styles, save_styles
-from prompt_operations import create_prompt
+from firebase_operations import initialize_firebase, load_styles
 from ui_components import render_style_editor, render_text_converter
 
 def main():

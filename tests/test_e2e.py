@@ -5,11 +5,9 @@ import time
 import os
 import signal
 import sys
-import re
 
 # 親ディレクトリをPythonパスに追加
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import app
 
 @pytest.fixture(scope="module")
 def streamlit_process():

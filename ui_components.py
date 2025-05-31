@@ -3,18 +3,11 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
-import os
-from dotenv import load_dotenv
-import firebase_admin
-from firebase_admin import credentials, db
-from typing import List, Optional, Tuple
-from functools import partial
-from models import Styles, Style, Example
 from style_operations import (
     create_style, add_example, remove_example, rename_style,
     validate_style_name, validate_example
 )
-from firebase_operations import initialize_firebase, load_styles, save_styles
+from firebase_operations import save_styles
 from prompt_operations import create_prompt
 
 @st.dialog("文体の編集")
@@ -125,7 +118,7 @@ def render_style_editor(style_to_edit, on_example_modified=False):
     with tab3:
         st.markdown(f"##### 削除する文体：{style_to_edit}")
         st.warning(f"「{style_to_edit}」を削除しますか？ この操作は取り消せません。")
-        if st.button("削除", key=f"delete_style", use_container_width=True, type="primary"):
+        if st.button("削除", key="delete_style", use_container_width=True, type="primary"):
             style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
             if style_index is not None:
                 st.session_state.styles.pop(style_index)

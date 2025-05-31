@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import Tuple, Optional
 from models import Style, Example, Styles
 
 def create_style(name: str) -> Style:
