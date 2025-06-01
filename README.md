@@ -6,6 +6,7 @@
 - [デプロイ先](#デプロイ先)
 - [アプリケーションの操作方法](#アプリケーションの操作方法)
 - [技術スタック](#技術スタック)
+- [モジュール構成](#モジュール構成)
 - [セットアップ手順 (ローカル環境)](#セットアップ手順-ローカル環境)
   - [環境変数の設定](#環境変数の設定)
 - [セットアップ手順 (Streamlit Community Cloud)](#セットアップ手順-streamlit-community-cloud)
@@ -41,6 +42,16 @@
 - OpenAI API: 文章の文体変換処理
 - pytest: テストフレームワーク（デプロイには含まれません）
 - Playwright: E2Eテスト用のブラウザ自動化ツール（デプロイには含まれません）
+
+## モジュール構成
+- `app.py`: アプリケーションのエントリーポイント。Streamlitの設定とメインのUIレイアウトを定義
+- `models.py`: データモデルの定義（Style, Exampleクラス）
+- `firebase_operations.py`: Firebase Realtime Databaseとの連携処理（初期化、データの読み書き）
+- `style_operations.py`: 文体データの操作（作成、編集、削除、バリデーション）
+- `prompt_operations.py`: OpenAI API用のプロンプト生成
+- `ui_components.py`: StreamlitのUIコンポーネント（文体エディタ、テキスト変換UI）
+- `tests/`: E2Eテストとユニットテスト
+  - `test_e2e.py`: Playwrightを使用したE2Eテスト
 
 ## セットアップ手順 (ローカル環境)
 
