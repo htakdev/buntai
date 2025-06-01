@@ -1,5 +1,6 @@
 from models import Style
 
+
 def create_prompt(style: Style, input_text: str) -> str:
     """プロンプトを作成する"""
     system_message = f"あなたは文章の文体を{style.name}が用いる文体に変換する専門家です。"

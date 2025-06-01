@@ -1,5 +1,7 @@
-from typing import Tuple, Optional
-from models import Style, Example, Styles
+from typing import List, Optional, Tuple
+
+from models import Example, Style
+
 
 def create_style(name: str) -> Style:
     """新しい文体を作成する"""
@@ -21,7 +23,7 @@ def rename_style(style: Style, new_name: str) -> Style:
     """文体の名前を変更する"""
     return Style(name=new_name, examples=style.examples)
 
-def validate_style_name(name: str, existing_styles: Styles) -> Tuple[bool, Optional[str]]:
+def validate_style_name(name: str, existing_styles: List[Style]) -> Tuple[bool, Optional[str]]:
     """文体名のバリデーション"""
     if not name:
         return False, "文体の名称を入力してください。"

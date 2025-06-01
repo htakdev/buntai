@@ -1,8 +1,12 @@
 import os
-import streamlit as st
+from typing import List
+
 import firebase_admin
+import streamlit as st
 from firebase_admin import credentials, db
-from models import Styles, Style, Example
+
+from models import Example, Style
+
 
 def initialize_firebase():
     """Firebaseの初期化"""
@@ -20,7 +24,7 @@ def initialize_firebase():
             'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
         })
 
-def load_styles() -> Styles:
+def load_styles() -> List[Style]:
     """文体データをFirebaseから読み込む"""
     try:
         ref = db.reference('/styles')
@@ -45,7 +49,7 @@ def load_styles() -> Styles:
         st.error(f"データの読み込みに失敗しました: {str(e)}")
         return []
 
-def save_styles(styles: Styles):
+def save_styles(styles: List[Style]):
     """文体データをFirebaseに保存"""
     try:
         ref = db.reference('/styles')

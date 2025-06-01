@@ -1,5 +1,6 @@
 import pytest
 
+
 def pytest_configure(config):
     """Playwrightの設定"""
     config.addinivalue_line(

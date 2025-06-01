@@ -1,10 +1,11 @@
-import pytest
-from playwright.sync_api import Page, expect
-import subprocess
-import time
 import os
 import signal
+import subprocess
 import sys
+import time
+
+import pytest
+from playwright.sync_api import Page, expect
 
 # 親ディレクトリをPythonパスに追加
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

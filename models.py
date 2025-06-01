@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List, TypeAlias
+from typing import List
+
 
 @dataclass
 class Example:
@@ -10,5 +11,3 @@ class Example:
 class Style:
     name: str
     examples: List[Example]
-
-Styles: TypeAlias = List[Style]
