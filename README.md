@@ -7,9 +7,9 @@
 - [アプリケーションの操作方法](#アプリケーションの操作方法)
 - [技術スタック](#技術スタック)
 - [モジュール構成](#モジュール構成)
-- [セットアップ手順 (ローカル環境)](#セットアップ手順-ローカル環境)
+- [セットアップ手順（ローカル環境）](#セットアップ手順ローカル環境)
   - [環境変数の設定](#環境変数の設定)
-- [セットアップ手順 (Streamlit Community Cloud)](#セットアップ手順-streamlit-community-cloud)
+- [セットアップ手順（Streamlit Community Cloud）](#セットアップ手順streamlit-community-cloud)
   - [Secretsの設定](#secretsの設定)
 
 ## 概要
@@ -50,10 +50,10 @@
 - `style_operations.py`: 文体データの操作（作成、編集、削除、バリデーション）
 - `prompt_operations.py`: OpenAI API用のプロンプト生成
 - `ui_components.py`: StreamlitのUIコンポーネント（文体エディタ、テキスト変換UI）
-- `tests/`: E2Eテストとユニットテスト
+- `tests/`: テスト（デプロイには含まれません）
   - `test_e2e.py`: Playwrightを使用したE2Eテスト
 
-## セットアップ手順 (ローカル環境)
+## セットアップ手順（ローカル環境）
 
 1.  リポジトリをクローンします。
     ```bash
@@ -85,7 +85,7 @@
     *   **クレデンシャル**: Firebaseプロジェクトのサービスアカウントキーが必要です。
         *   FirebaseからダウンロードしたサービスアカウントキーのJSONファイルをリポジトリのルートディレクトリに `firebase-credentials.json` とリネームして配置してください。**このファイルはGitHubなどにアップロードしないよう注意してください。**
     *   **Database URL**: Firebase Realtime DatabaseのURLを設定します。後述する `.env` ファイルを用意する方法がお勧めです。
-        *   環境変数 `FIREBASE_DATABASE_URL` に、FirebaseプロジェクトのDatabase URL (例: `https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com`) を設定してください。
+        *   環境変数 `FIREBASE_DATABASE_URL` に、FirebaseプロジェクトのDatabase URL（例: `https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com`）を設定してください。
 
 2.  **OpenAI API キーの設定**:
     *   環境変数 `OPENAI_API_KEY` に、OpenAIのAPIキーを設定してください。後述する `.env` ファイルを用意する方法がお勧めです。
@@ -101,7 +101,7 @@ OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 APP_ENV=local
 ```
 
-## セットアップ手順 (Streamlit Community Cloud)
+## セットアップ手順（Streamlit Community Cloud）
 
 下記のURLを参照してください。おそらくご自身のGitHubリポジトリにフォークして実施することになると思います。
 
@@ -118,7 +118,7 @@ APP_ENV=local
     *   **クレデンシャル**: Firebaseプロジェクトのサービスアカウントキーが必要です。
         *   ソースコード上で `st.secrets["firebase"]` としてアクセスできるよう、Streamlit Community CloudのSecrets管理画面でサービスアカウントキーの内容を登録してください。TOMLの仕様により、末尾に記述することが必要なようです。下記の書式例を参照してください。
     *   **Database URL**: Firebase Realtime DatabaseのURLを設定します。
-        *   環境変数 `FIREBASE_DATABASE_URL` に、FirebaseプロジェクトのDatabase URL (例: `https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com`) を設定してください。
+        *   環境変数 `FIREBASE_DATABASE_URL` に、FirebaseプロジェクトのDatabase URL（例: `https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com`）を設定してください。
 
 2.  **OpenAI API キーの設定**:
     *   環境変数 `OPENAI_API_KEY` に、OpenAIのAPIキーを設定してください。
@@ -129,12 +129,12 @@ APP_ENV=local
 環境変数とFirebaseクレデンシャルをSecrets管理画面で設定する書式例は下記です。Firebaseクレデンシャルは末尾の入力が必要なようですのでご注意ください。
 
 ```toml
-# .streamlit/secrets.toml ファイルの内容例 (Streamlit Community Cloudの場合)
+# .streamlit/secrets.toml ファイルの内容例（Streamlit Community Cloudの場合）
 FIREBASE_DATABASE_URL = "https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com"
 OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
 APP_ENV = "scc"
 
-# FirebaseクレデンシャルはJSONの内容をそのまま登録 (キー名は'firebase'とする)
+# FirebaseクレデンシャルはJSONの内容をそのまま登録（キー名は'firebase'とする）
 [firebase]
 type = "service_account"
 project_id = "<YOUR-PROJECT-ID>"
