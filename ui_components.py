@@ -17,7 +17,7 @@ from style_operations import (
 
 
 @st.dialog("文体の編集")
-def render_style_editor(style_to_edit, on_example_modified=False):
+def render_style_editor(style_to_edit: str, on_example_modified: bool = False):
     """文体エディタのUIを描画"""
     st.markdown("#### 新しい文体を追加")
     new_style = st.text_input("追加する文体の名称（名称も結果に影響します）")
@@ -45,8 +45,8 @@ def render_style_editor(style_to_edit, on_example_modified=False):
 
     with tab1:
         st.markdown(f"##### 例文の編集：{style_to_edit}")
-        selected_style = next((style for style in st.session_state.styles if style.name == style_to_edit), None)
-        valid_examples = [ex for ex in selected_style.examples if ex.input and ex.output]
+        selected_style = next((style for style in st.session_state.styles if style.name == style_to_edit))
+        valid_examples = [example for example in selected_style.examples if example.input and example.output]
 
         if not valid_examples:
             st.warning("例文は未登録です。")
@@ -58,15 +58,12 @@ def render_style_editor(style_to_edit, on_example_modified=False):
                     st.markdown(f"**出力：**\n{example.output}")
                     if st.button("削除", key=f"delete_example_{i}", type="primary"):
                         new_style = remove_example(selected_style, i-1)
-                        style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
-                        if style_index is not None:
-                            st.session_state.styles[style_index] = new_style
-                            save_styles(st.session_state.styles)
-                            st.session_state.success_message_in_modal = "例文を削除しました。"
-                            st.session_state.on_example_modified = True
-                            st.rerun()
-                        else:
-                            st.error("文体が見つかりませんでした。")
+                        style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit))
+                        st.session_state.styles[style_index] = new_style
+                        save_styles(st.session_state.styles)
+                        st.session_state.success_message_in_modal = "例文を削除しました。"
+                        st.session_state.on_example_modified = True
+                        st.rerun()
 
         if on_example_modified:
             st.success(st.session_state.success_message_in_modal)
@@ -125,17 +122,12 @@ def render_style_editor(style_to_edit, on_example_modified=False):
         st.markdown(f"##### 削除する文体：{style_to_edit}")
         st.warning(f"「{style_to_edit}」を削除しますか？ この操作は取り消せません。")
         if st.button("削除", key="delete_style", use_container_width=True, type="primary"):
-            style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit), None)
-            if style_index is not None:
-                st.session_state.styles.pop(style_index)
-                if st.session_state.selected_style == style_to_edit:
-                    st.session_state.selected_style = "文体を選択してください"
-                st.session_state.editing_style = None
-                save_styles(st.session_state.styles)
-                st.session_state.success_message = f"「{style_to_edit}」を削除しました。"
-                st.rerun()
-            else:
-                st.error("文体が見つかりませんでした。")
+            style_index = next((i for i, style in enumerate(st.session_state.styles) if style.name == style_to_edit))
+            st.session_state.styles.pop(style_index)
+            st.session_state.editing_style = None
+            save_styles(st.session_state.styles)
+            st.session_state.success_message = f"「{style_to_edit}」を削除しました。"
+            st.rerun()
 
 def render_text_converter():
     """テキスト変換UIを描画"""
@@ -149,7 +141,7 @@ def render_text_converter():
         elif not input_text:
             convert_warning_container.warning("文章を入力してください。")
         else:
-            selected_style = next((style for style in st.session_state.styles if style.name == st.session_state.selected_style), None)
+            selected_style = next((style for style in st.session_state.styles if style.name == st.session_state.selected_style))
 
             prompt = ChatPromptTemplate.from_messages([
                 ("system", create_prompt(selected_style, input_text) + 

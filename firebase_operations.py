@@ -1,4 +1,5 @@
 import os
+from dataclasses import asdict
 from typing import List
 
 import firebase_admin
@@ -10,19 +11,21 @@ from models import Example, Style
 
 def initialize_firebase():
     """Firebaseの初期化"""
-    if not firebase_admin._apps:
-        app_env = os.getenv('APP_ENV', 'local')
+    if firebase_admin._apps:
+        return
 
-        if app_env == 'scc':
-            # Streamlit Community Cloud環境
-            cred = credentials.Certificate(dict(st.secrets["firebase"]))
-        else:
-            # ローカル環境
-            cred = credentials.Certificate('firebase-credentials.json')
+    app_env = os.getenv('APP_ENV', 'local')
 
-        firebase_admin.initialize_app(cred, {
-            'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
-        })
+    if app_env == 'scc':
+        # Streamlit Community Cloud環境
+        cred = credentials.Certificate(dict(st.secrets["firebase"]))
+    else:
+        # ローカル環境
+        cred = credentials.Certificate('firebase-credentials.json')
+
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
+    })
 
 def load_styles() -> List[Style]:
     """文体データをFirebaseから読み込む"""
@@ -34,12 +37,7 @@ def load_styles() -> List[Style]:
 
         styles = []
         for style in raw_styles_data:
-            examples = []
-            for example in style.get('examples', []):
-                examples.append(Example(
-                    input=example.get('input', ''),
-                    output=example.get('output', '')
-                ))
+            examples = [Example(**example) for example in style.get('examples', [])]
             styles.append(Style(
                 name=style.get('name', ''),
                 examples=examples
@@ -61,10 +59,7 @@ def save_styles(styles: List[Style]):
             style_ref.set({
                 'name': style.name,
                 'examples': {
-                    str(j): {
-                        'input': example.input,
-                        'output': example.output
-                    } for j, example in enumerate(style.examples)
+                    str(j): asdict(example) for j, example in enumerate(style.examples)
                 }
             })
     except Exception as e:
