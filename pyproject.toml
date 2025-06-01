@@ -1,0 +1,7 @@
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["models"]
+default-section = "third-party"
+section-order = ["standard-library", "third-party", "first-party", "local-folder"]
